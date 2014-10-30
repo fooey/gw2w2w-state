@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      body {
-        font-family: Tahoma, Geneva, sans-serif;
-      }
-      div {
-        display: inline;
-      }
-    </style>
-    <script>
-      function updateStats(memuse) {
-        document.getElementById('rss').innerHTML = memuse.rss;
-        document.getElementById('heapTotal').innerHTML = memuse.heapTotal;
-        document.getElementById('heapUsed').innerHTML = memuse.heapUsed;
-      }
-      var host = window.document.location.host.replace(/:.*/, '');
-      var ws = new WebSocket('ws://' + host + ':80');
-      ws.onmessage = function (event) {
-        updateStats(JSON.parse(event.data));
-      };
-    </script>
-  </head>
-  <body>
-    <strong>Server Stats</strong><br>
-    RSS: <div id='rss'></div><br>
-    Heap total: <div id='heapTotal'></div><br>
-    Heap used: <div id='heapUsed'></div><br>
-  </body>
+<head>
+  <style> 
+    body {
+      font-family: Tahoma, Geneva, sans-serif; 
+    } 
+    div {
+      display: inline; 
+    } </style>
+  <script src="/primus/primus.io.js"></script>
+  <script>
+var primus = Primus.connect('ws://localhost:3000'), 
+  chat = primus.channel('chat'),
+  news = primus.channel('news');
+  chat.on('chat', function (msg) {
+    console.log(msg); //-> welcome to this chat
+  });
+
+  news.on('news', function (data) {
+    console.log(data.news); //-> item
+  });
+  </script>
+</head>
+<body>
+</body>
 </html>

@@ -1,23 +1,27 @@
-var WebSocketServer = require('ws').Server,
-	http = require('http'),
-	express = require('express'),
-	app = express();
+var express = require('express');
+var	http = require('http');
+var	app = express();
+var	server = http.createServer(app);
+
+// Primus server
+var Primus = require('primus.io');
+var primus = new Primus(server, { transformer: 'websockets', parser: 'JSON' });
+
+
+var chat = primus.channel('chat');
+var news = primus.channel('news');
+
+chat.on('connection', function(spark) {
+	spark.send('chat', 'welcome to this chat');
+});
+
+news.on('connection', function(socket) {
+	socket.send('news', { news: 'item' });
+});
+
 
 app.use(express.static(__dirname + '/public'));
 
-var server = http.createServer(app);
+
+
 server.listen(process.env.PORT || 3000);
-
-var wss = new WebSocketServer({server: server});
-wss.on('connection', function(ws) {
-	var id = setInterval(function() {
-		ws.send(JSON.stringify(process.memoryUsage()), function() { /* ignore errors */ });
-	}, 1000);
-
-	console.log('started client interval');
-
-	ws.on('close', function() {
-		console.log('stopping client interval');
-		clearInterval(id);
-	});
-});

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/fooey/gw2w2w-state",
   "dependencies": {
     "express": "^4.10.1",
+    "primus.io": "^3.1.2",
     "request": "^2.47.0",
     "ws": "^0.4.32"
   }
