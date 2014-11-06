@@ -26,7 +26,7 @@
     "errorhandler": "^1.2.2",
     "express": "^4.10.1",
     "gw2api": "^0.1.2",
-    "gw2w2w-static": "0.0.1",
+    "gw2w2w-static": "0.0.3",
     "lodash": "^2.4.1",
     "moment": "^2.8.3",
     "morgan": "^1.4.1",
