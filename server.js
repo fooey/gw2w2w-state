@@ -1,27 +1,28 @@
-var express = require('express');
-var	http = require('http');
-var	app = express();
-var	server = http.createServer(app);
-
-// Primus server
-var Primus = require('primus.io');
-var primus = new Primus(server, { transformer: 'websockets', parser: 'JSON' });
+'use strict';
 
 
-var chat = primus.channel('chat');
-var news = primus.channel('news');
 
-chat.on('connection', function(spark) {
-	spark.send('chat', 'welcome to this chat');
+
+const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
+require('./config/express')(app, express);
+
+
+
+GLOBAL.data = {};
+// GLOBAL.ws = require('./lib/websockets')(server);
+
+
+
+require('./routes')(app, express);
+require('./lib/data/update')();
+
+
+
+
+
+console.log(Date.now(), 'Running Node.js ' + process.version + ' with flags "' + process.execArgv.join(' ') + '"');
+server.listen(app.get('port'), function() {
+	console.log(Date.now(), 'Express server listening on port ' + app.get('port') + ' in mode: ' + app.get('env'));
 });
-
-news.on('connection', function(socket) {
-	socket.send('news', { news: 'item' });
-});
-
-
-app.use(express.static(__dirname + '/public'));
-
-
-
-server.listen(process.env.PORT || 3000);
