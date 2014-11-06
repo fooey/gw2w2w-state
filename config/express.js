@@ -27,6 +27,7 @@ module.exports = function(app, express) {
 	const errorHandler = require('errorhandler');
 	const morgan = require('morgan');
 	const slashes = require('connect-slashes');
+	const cors = require('cors');
 
 	if (isDev) {
 		app.use(errorHandler({ dumpExceptions: true, showStack: true }));
@@ -37,6 +38,7 @@ module.exports = function(app, express) {
 		app.use(morgan('combined'));
 	}
 
+	app.use(cors());
 	app.use(compression());
 	app.use(slashes(false)); // no trailing slashes
 };
