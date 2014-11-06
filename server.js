@@ -1,5 +1,8 @@
 'use strict';
 
+if (app.get('env') !== 'development') {
+	require('newrelic');
+}
 
 
 

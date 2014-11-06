@@ -31,9 +31,8 @@
     "lodash": "^2.4.1",
     "moment": "^2.8.3",
     "morgan": "^1.4.1",
-    "primus.io": "^3.1.2",
-    "request": "^2.47.0",
-    "ws": "^0.4.32"
+    "newrelic": "^1.13.0",
+    "request": "^2.47.0"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
