@@ -7,9 +7,20 @@ module.exports = function(app, express) {
 	app.use(express.static(process.cwd() + '/public'));
 
 
+
+	/*
+	* debug
+	*/
+
 	app.use('/dump', function(req, res) {
 		res.send(GLOBAL.data);
 	});
+
+
+
+	/*
+	* matches
+	*/
 
 	app.use('/matches$', function(req, res) {
 		console.log('matches', req.params);
@@ -31,6 +42,12 @@ module.exports = function(app, express) {
 		console.log('matches by matchId', req.params);
 		res.send(GLOBAL.data.matches[req.params.matchId]);
 	});
+
+
+
+	/*
+	* matchDetails
+	*/
 
 	app.use('/:matchId([12]\-[1-9])', function(req, res) {
 		console.log('details by matchId', req.params);
