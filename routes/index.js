@@ -1,5 +1,7 @@
 'use strict';
-var _ = require('lodash');
+
+const _ = require('lodash');
+const worlds = require('gw2w2w-static').worlds;
 
 module.exports = function(app, express) {
 	app.use(express.static(process.cwd() + '/public'));
@@ -33,10 +35,7 @@ module.exports = function(app, express) {
 	app.use('/:matchId([12]\-[1-9])', function(req, res) {
 		console.log('details by matchId', req.params);
 
-		res.send({
-			match: GLOBAL.data.matches[req.params.matchId],
-			details: GLOBAL.data.details[req.params.matchId],
-		});
+		res.send(getDetails(req.params.matchId));
 	});
 
 
@@ -44,7 +43,6 @@ module.exports = function(app, express) {
 		console.log('details by worldSlug', req.params);
 
 		const worldSlug = req.params.worldSlug;
-		const worlds = require('gw2w2w-static').worlds;
 		const world = _.find(worlds, function(world) {
 			return (
 				world.en.slug === worldSlug
@@ -62,10 +60,7 @@ module.exports = function(app, express) {
 		});
 
 		if (match) {
-			res.send({
-				match: GLOBAL.data.matches[match.id],
-				details: GLOBAL.data.details[match.id],
-			});
+			res.send(getDetails(match.id));
 		}
 		else {
 			res.send({});
@@ -73,3 +68,12 @@ module.exports = function(app, express) {
 
 	});
 };
+
+
+function getDetails(matchId) {
+	return {
+		now: Date.now(),
+		match: GLOBAL.data.matches[matchId],
+		details: GLOBAL.data.details[matchId],
+	};
+}
