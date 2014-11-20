@@ -1,10 +1,29 @@
 'use strict';
 
 const _ = require('lodash');
-const worlds = require('gw2w2w-static').worlds;
 
-module.exports = function(app, express) {
-	app.use(express.static(process.cwd() + '/public'));
+
+module.exports = function(server, restify) {
+
+
+	/*
+	* config
+	*/
+
+	server.pre(restify.pre.sanitizePath());
+
+
+
+	/*
+	* static
+	*/
+
+	server.get("/", restify.serveStatic({
+		directory: process.cwd() + '/public',
+		default: 'index.html'
+	}));
+
+
 
 
 
@@ -12,8 +31,9 @@ module.exports = function(app, express) {
 	* debug
 	*/
 
-	app.use('/dump', function(req, res) {
-		res.send(GLOBAL.data);
+	server.get('/dump', function(req, res, next) {
+		res.json(GLOBAL.data);
+		// next();
 	});
 
 
@@ -22,25 +42,33 @@ module.exports = function(app, express) {
 	* matches
 	*/
 
-	app.use('/matches$', function(req, res) {
+	server.get('/matches$', function(req, res, next) {
 		console.log('matches', req.params);
-		res.send(GLOBAL.data.matches);
+		res.json(GLOBAL.data.matches);
+		// next();
 	});
-	app.use('/matches/:regionId([12])$', function(req, res) {
-		console.log('matches by regionId', req.params);
 
-		const regionId = _.parseInt(req.params.regionId);
+	const matchesByRegionId = /^\/matches\/([12])$/;
+	server.get(matchesByRegionId, function(req, res, next) {
+		const regionId = _.parseInt(req.params[0]);
+		console.log('matches by regionId', regionId);
 
-		res.send(
+		res.json(
 			_.chain(GLOBAL.data.matches)
 				.filter({region: regionId})
 				.indexBy('id')
 				.value()
 		);
+		// next();
 	});
-	app.use('/matches/:matchId([12]\-[1-9])', function(req, res) {
-		console.log('matches by matchId', req.params);
-		res.send(GLOBAL.data.matches[req.params.matchId]);
+
+	const matchesByMatchId = /^\/matches\/([12]-[1-9])$/;
+	server.get(matchesByMatchId, function(req, res, next) {
+		const matchId = req.params[0];
+		console.log('matches by matchId', matchId);
+
+		res.json(GLOBAL.data.matches[matchId]);
+		// next();dunno
 	});
 
 
@@ -49,42 +77,32 @@ module.exports = function(app, express) {
 	* matchDetails
 	*/
 
-	app.use('/:matchId([12]\-[1-9])', function(req, res) {
-		console.log('details by matchId', req.params);
+	const detailsByMatchId = /^\/([12]-[1-9])$/;
+	server.get(detailsByMatchId, function(req, res, next) {
+		const matchId = req.params[0];
+		console.log('details by matchId', matchId);
 
-		res.send(getDetails(req.params.matchId));
+		res.json(getDetails(matchId));
+		// next();
 	});
 
+	const detailsByWorldSlug = /^\/world\/([a-z-]+)$/;
+	server.get(detailsByWorldSlug, function(req, res, next) {
+		const worldSlug = req.params[0];
+		console.log('details by worldSlug', worldSlug);
 
-	app.use('/world/:worldSlug([a-z-]+)', function(req, res) {
-		console.log('details by worldSlug', req.params);
-
-		const worldSlug = req.params.worldSlug;
-		const world = _.find(worlds, function(world) {
-			return (
-				world.en.slug === worldSlug
-				|| world.es.slug === worldSlug
-				|| world.de.slug === worldSlug
-				|| world.fr.slug === worldSlug
-			);
-		});
-		const match = _.find(GLOBAL.data.matches, function(match) {
-			return (
-				world.id == match.redId
-				|| world.id == match.blueId
-				|| world.id == match.greenId
-			);
-		});
+		const world = getWorldBySlug(worldSlug);
+		const match = getMatchByWorldId(world.id);
 
 		if (match) {
-			res.send(getDetails(match.id));
+			res.json(getDetails(match.id));
 		}
 		else {
-			res.send({});
+			res.send(404, 'Not Found');
 		}
-
 	});
 };
+
 
 
 function getDetails(matchId) {
@@ -93,4 +111,31 @@ function getDetails(matchId) {
 		match: GLOBAL.data.matches[matchId],
 		details: GLOBAL.data.details[matchId],
 	};
+}
+
+
+
+function getWorldBySlug(worldSlug) {
+	const worlds = require('gw2w2w-static').worlds;
+
+	return _.find(worlds, function(world) {
+		return (
+			world.en.slug === worldSlug
+			|| world.es.slug === worldSlug
+			|| world.de.slug === worldSlug
+			|| world.fr.slug === worldSlug
+		);
+	});
+}
+
+
+
+function getMatchByWorldId(worldId) {
+	return _.find(GLOBAL.data.matches, function(match) {
+		return (
+			worldId == match.redId
+			|| worldId == match.blueId
+			|| worldId == match.greenId
+		);
+	});
 }

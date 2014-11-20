@@ -1,24 +1,30 @@
 'use strict';
 
-if (process.env.NODE_ENV !== 'development') {
+const isDev = (process.env.NODE_ENV === 'development');
+const isProd = !isDev;
+const serverPort = process.env.PORT || 3000;
+
+
+if (isProd) {
 	require('newrelic');
 }
 
 
 
-const express = require('express');
-const app = express();
-const server = require('http').createServer(app);
-require('./config/express')(app, express);
+
+const restify = require('restify');
+
+var server = restify.createServer({
+	name: 'state.gw2w2w.com',
+});
+
+
+require('./config/restify')(server, restify);
+require('./routes')(server, restify);
 
 
 
 GLOBAL.data = {};
-// GLOBAL.ws = require('./lib/websockets')(server);
-
-
-
-require('./routes')(app, express);
 require('./lib/data/update')();
 
 
@@ -26,6 +32,6 @@ require('./lib/data/update')();
 
 
 console.log(Date.now(), 'Running Node.js ' + process.version + ' with flags "' + process.execArgv.join(' ') + '"');
-server.listen(app.get('port'), function() {
-	console.log(Date.now(), 'Express server listening on port ' + app.get('port') + ' in mode: ' + app.get('env'));
+server.listen(serverPort, function() {
+	console.log(Date.now(), 'Restify server listening on port ' + serverPort + ' in mode: ' + process.env.NODE_ENV);
 });
