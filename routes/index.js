@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 
-module.exports = function(server, restify) {
+module.exports = function(server, restify, dataObj) {
 
 
 	/*
@@ -32,7 +32,7 @@ module.exports = function(server, restify) {
 	*/
 
 	server.get('/dump', function(req, res, next) {
-		res.json(GLOBAL.data);
+		res.json(dataObj);
 		// next();
 	});
 
@@ -44,7 +44,7 @@ module.exports = function(server, restify) {
 
 	server.get('/matches$', function(req, res, next) {
 		console.log('matches', req.params);
-		res.json(GLOBAL.data.matches);
+		res.json(dataObj.matches);
 		// next();
 	});
 
@@ -54,7 +54,7 @@ module.exports = function(server, restify) {
 		console.log('matches by regionId', regionId);
 
 		res.json(
-			_.chain(GLOBAL.data.matches)
+			_.chain(dataObj.matches)
 				.filter({region: regionId})
 				.indexBy('id')
 				.value()
@@ -67,7 +67,7 @@ module.exports = function(server, restify) {
 		const matchId = req.params[0];
 		console.log('matches by matchId', matchId);
 
-		res.json(GLOBAL.data.matches[matchId]);
+		res.json(dataObj.matches[matchId]);
 		// next();dunno
 	});
 
@@ -108,8 +108,8 @@ module.exports = function(server, restify) {
 function getDetails(matchId) {
 	return {
 		now: Date.now(),
-		match: GLOBAL.data.matches[matchId],
-		details: GLOBAL.data.details[matchId],
+		match: dataObj.matches[matchId],
+		details: dataObj.details[matchId],
 	};
 }
 
@@ -131,7 +131,7 @@ function getWorldBySlug(worldSlug) {
 
 
 function getMatchByWorldId(worldId) {
-	return _.find(GLOBAL.data.matches, function(match) {
+	return _.find(dataObj.matches, function(match) {
 		return (
 			worldId == match.redId
 			|| worldId == match.blueId
