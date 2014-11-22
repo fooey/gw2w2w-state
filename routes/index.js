@@ -101,41 +101,46 @@ module.exports = function(server, restify, dataObj) {
 			res.send(404, 'Not Found');
 		}
 	});
+
+
+
+
+
+
+
+	function getDetails(matchId) {
+		return {
+			now: Date.now(),
+			match: dataObj.matches[matchId],
+			details: dataObj.details[matchId],
+		};
+	}
+
+
+
+	function getWorldBySlug(worldSlug) {
+		const worlds = require('gw2w2w-static').worlds;
+
+		return _.find(worlds, function(world) {
+			return (
+				world.en.slug === worldSlug
+				|| world.es.slug === worldSlug
+				|| world.de.slug === worldSlug
+				|| world.fr.slug === worldSlug
+			);
+		});
+	}
+
+
+
+	function getMatchByWorldId(worldId) {
+		return _.find(dataObj.matches, function(match) {
+			return (
+				worldId == match.redId
+				|| worldId == match.blueId
+				|| worldId == match.greenId
+			);
+		});
+	}
+
 };
-
-
-
-function getDetails(matchId) {
-	return {
-		now: Date.now(),
-		match: dataObj.matches[matchId],
-		details: dataObj.details[matchId],
-	};
-}
-
-
-
-function getWorldBySlug(worldSlug) {
-	const worlds = require('gw2w2w-static').worlds;
-
-	return _.find(worlds, function(world) {
-		return (
-			world.en.slug === worldSlug
-			|| world.es.slug === worldSlug
-			|| world.de.slug === worldSlug
-			|| world.fr.slug === worldSlug
-		);
-	});
-}
-
-
-
-function getMatchByWorldId(worldId) {
-	return _.find(dataObj.matches, function(match) {
-		return (
-			worldId == match.redId
-			|| worldId == match.blueId
-			|| worldId == match.greenId
-		);
-	});
-}
