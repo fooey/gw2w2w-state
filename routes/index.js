@@ -90,9 +90,10 @@ module.exports = function(app, express, dataObj) {
 
 			console.log('detailsByMatchId', matchId);
 
-			// if (matchDetails && matchDetails.match) {
-			// 	res.header('Last-Modified', matchDetails.match.lastmod * 1000);
-			// }
+			if (matchDetails && matchDetails.match) {
+				res.header('Last-Modified', matchDetails.match.lastmod * 1000);
+				res.header('Etag', `matchDetails::${matchId}::${matchDetails.match.lastmod}`);
+			}
 
 			res.send(matchDetails);
 		}
@@ -105,10 +106,13 @@ module.exports = function(app, express, dataObj) {
 
 		const world = getWorldBySlug(worldSlug);
 		const match = getMatchByWorldId(world.id);
+		const matchId = match.id;
+		const matchDetails = getDetails(matchId);
 
 		if (match) {
-			// res.header('Last-Modified', match.lastmod * 1000);
-			res.send(getDetails(match.id));
+			res.header('Last-Modified', matchDetails.match.lastmod * 1000);
+			res.header('Etag', `matchDetails::${matchId}::${matchDetails.match.lastmod}`);
+			res.send(matchDetails);
 		}
 		else {
 			res.send(404, 'Not Found');
