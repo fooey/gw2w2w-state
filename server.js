@@ -1,6 +1,7 @@
 'use strict';
 
-const isDev = (process.env.NODE_ENV === 'development');
+const nodeEnv = process.env.NODE_ENV ? process.env.NODE_ENV : 'production';
+const isDev = (nodeEnv === 'development');
 const isProd = !isDev;
 const serverPort = process.env.PORT || 3000;
 
@@ -28,9 +29,20 @@ dataObj.init(function() {
 	require('./routes')(server, restify, dataObj);
 
 
-	console.log(Date.now(), 'Running Node.js ' + process.version + ' with flags "' + process.execArgv.join(' ') + '"');
 	server.listen(serverPort, function() {
-		console.log(Date.now(), 'Restify server listening on port ' + serverPort + ' in mode: ' + process.env.NODE_ENV);
+		console.log('');
+		console.log('**************************************************');
+		console.log('Express server started');
+		console.log('Time: %d', Date.now());
+		console.log('Port: %d', serverPort);
+		console.log('Mode: %s', nodeEnv);
+		console.log('PID: %s', process.pid);
+		console.log('Platform: %s', process.platform);
+		console.log('Arch: %s', process.arch);
+		console.log('Node: %s', process.versions.node);
+		console.log('V8: %s', process.versions.v8);
+		console.log('**************************************************');
+		console.log('');
 	});
 
 });

@@ -31,9 +31,8 @@ module.exports = function(server, restify, dataObj) {
 	* debug
 	*/
 
-	server.get('/dump', function(req, res, next) {
+	server.get('/dump', function(req, res) {
 		res.json(dataObj);
-		// next();
 	});
 
 
@@ -42,14 +41,13 @@ module.exports = function(server, restify, dataObj) {
 	* matches
 	*/
 
-	server.get('/matches$', function(req, res, next) {
+	server.get('/matches$', function(req, res) {
 		console.log('matches', req.params);
 		res.json(dataObj.matches);
-		// next();
 	});
 
 	const matchesByRegionId = /^\/matches\/([12])$/;
-	server.get(matchesByRegionId, function(req, res, next) {
+	server.get(matchesByRegionId, function(req, res) {
 		const regionId = _.parseInt(req.params[0]);
 		console.log('matches by regionId', regionId);
 
@@ -59,16 +57,14 @@ module.exports = function(server, restify, dataObj) {
 				.indexBy('id')
 				.value()
 		);
-		// next();
 	});
 
 	const matchesByMatchId = /^\/matches\/([12]-[1-9])$/;
-	server.get(matchesByMatchId, function(req, res, next) {
+	server.get(matchesByMatchId, function(req, res) {
 		const matchId = req.params[0];
 		console.log('matches by matchId', matchId);
 
 		res.json(dataObj.matches[matchId]);
-		// next();dunno
 	});
 
 
@@ -78,16 +74,15 @@ module.exports = function(server, restify, dataObj) {
 	*/
 
 	const detailsByMatchId = /^\/([12]-[1-9])$/;
-	server.get(detailsByMatchId, function(req, res, next) {
+	server.get(detailsByMatchId, function(req, res) {
 		const matchId = req.params[0];
 		console.log('details by matchId', matchId);
 
 		res.json(getDetails(matchId));
-		// next();
 	});
 
 	const detailsByWorldSlug = /^\/world\/([a-z-]+)$/;
-	server.get(detailsByWorldSlug, function(req, res, next) {
+	server.get(detailsByWorldSlug, function(req, res) {
 		const worldSlug = req.params[0];
 		console.log('details by worldSlug', worldSlug);
 
