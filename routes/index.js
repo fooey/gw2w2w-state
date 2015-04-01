@@ -60,12 +60,15 @@ module.exports = function(server, restify, dataObj) {
 	});
 
 	const matchesByMatchId = /^\/matches\/([12]-[1-9])$/;
-	server.get(matchesByMatchId, function(req, res) {
+	server.get(matchesByMatchId, function(req, res, next) {
 		const matchId = req.params[0];
 		console.log('matches by matchId', matchId);
+		const match = dataObj.matches[matchId];
 
-		res.json(dataObj.matches[matchId]);
-	});
+		res.header('Last-Modified', match.lastmod * 1000);
+		res.json(match);
+		return next();
+	}, restify.conditionalRequest());
 
 
 
@@ -74,15 +77,20 @@ module.exports = function(server, restify, dataObj) {
 	*/
 
 	const detailsByMatchId = /^\/([12]-[1-9])$/;
-	server.get(detailsByMatchId, function(req, res) {
+	server.get(detailsByMatchId, function(req, res, next) {
 		const matchId = req.params[0];
 		console.log('details by matchId', matchId);
+		const data = getDetails(matchId);
 
-		res.json(getDetails(matchId));
-	});
+		if (data && data.match) {
+			res.header('Last-Modified', data.match.lastmod * 1000);
+		}
+		res.json(data);
+		return next();
+	}, restify.conditionalRequest());
 
 	const detailsByWorldSlug = /^\/world\/([a-z-]+)$/;
-	server.get(detailsByWorldSlug, function(req, res) {
+	server.get(detailsByWorldSlug, function(req, res, next) {
 		const worldSlug = req.params[0];
 		console.log('details by worldSlug', worldSlug);
 
@@ -90,12 +98,14 @@ module.exports = function(server, restify, dataObj) {
 		const match = getMatchByWorldId(world.id);
 
 		if (match) {
+			res.header('Last-Modified', match.lastmod * 1000);
 			res.json(getDetails(match.id));
 		}
 		else {
 			res.send(404, 'Not Found');
 		}
-	});
+		return next();
+	}, restify.conditionalRequest());
 
 
 
