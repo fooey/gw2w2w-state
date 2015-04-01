@@ -3,15 +3,7 @@
 const _ = require('lodash');
 
 
-module.exports = function(server, restify, dataObj) {
-
-
-	/*
-	* config
-	*/
-
-	server.pre(restify.pre.sanitizePath());
-	restify.conditionalRequest();
+module.exports = function(app, express, dataObj) {
 
 
 
@@ -19,10 +11,12 @@ module.exports = function(server, restify, dataObj) {
 	* static
 	*/
 
-	server.get("/", restify.serveStatic({
-		directory: process.cwd() + '/public',
-		default: 'index.html'
-	}));
+	app.use(express.static(
+		'public',
+		{
+			index: 'index.html'
+		}
+	));
 
 
 
@@ -32,8 +26,8 @@ module.exports = function(server, restify, dataObj) {
 	* debug
 	*/
 
-	server.get('/dump', function(req, res) {
-		res.json(dataObj);
+	app.get('/dump', function(req, res) {
+		res.send(dataObj);
 	});
 
 
@@ -42,17 +36,17 @@ module.exports = function(server, restify, dataObj) {
 	* matches
 	*/
 
-	server.get('/matches$', function(req, res) {
+	app.get('/matches$', function(req, res) {
 		console.log('matches', req.params);
-		res.json(dataObj.matches);
+		res.send(dataObj.matches);
 	});
 
 	const matchesByRegionId = /^\/matches\/([12])$/;
-	server.get(matchesByRegionId, function(req, res) {
+	app.get(matchesByRegionId, function(req, res) {
 		const regionId = _.parseInt(req.params[0]);
 		console.log('matches by regionId', regionId);
 
-		res.json(
+		res.send(
 			_.chain(dataObj.matches)
 				.filter({region: regionId})
 				.indexBy('id')
@@ -61,14 +55,15 @@ module.exports = function(server, restify, dataObj) {
 	});
 
 	const matchesByMatchId = /^\/matches\/([12]-[1-9])$/;
-	server.get(matchesByMatchId, function(req, res, next) {
+	app.get(matchesByMatchId, function(req, res) {
 		const matchId = req.params[0];
-		console.log('matches by matchId', matchId);
 		const match = dataObj.matches[matchId];
 
-		res.header('Last-Modified', match.lastmod * 1000);
-		res.json(match);
-		return next();
+		// res.header('Last-Modified', match.lastmod * 1000);
+
+		console.log('fresh', req.fresh);
+
+		res.send(match);
 	});
 
 
@@ -78,20 +73,24 @@ module.exports = function(server, restify, dataObj) {
 	*/
 
 	const detailsByMatchId = /^\/([12]-[1-9])$/;
-	server.get(detailsByMatchId, function(req, res, next) {
-		const matchId = req.params[0];
-		console.log('details by matchId', matchId);
-		const data = getDetails(matchId);
+	app.get(
+		detailsByMatchId,
+		function(req, res) {
+			const matchId = req.params[0];
+			const matchDetails = getDetails(matchId);
 
-		if (data && data.match) {
-			res.header('Last-Modified', data.match.lastmod * 1000);
+			console.log('detailsByMatchId', matchId);
+
+			// if (matchDetails && matchDetails.match) {
+			// 	res.header('Last-Modified', matchDetails.match.lastmod * 1000);
+			// }
+
+			res.send(matchDetails);
 		}
-		res.json(data);
-		return next();
-	});
+	);
 
 	const detailsByWorldSlug = /^\/world\/([a-z-]+)$/;
-	server.get(detailsByWorldSlug, function(req, res, next) {
+	app.get(detailsByWorldSlug, function(req, res) {
 		const worldSlug = req.params[0];
 		console.log('details by worldSlug', worldSlug);
 
@@ -99,13 +98,12 @@ module.exports = function(server, restify, dataObj) {
 		const match = getMatchByWorldId(world.id);
 
 		if (match) {
-			res.header('Last-Modified', match.lastmod * 1000);
-			res.json(getDetails(match.id));
+			// res.header('Last-Modified', match.lastmod * 1000);
+			res.send(getDetails(match.id));
 		}
 		else {
 			res.send(404, 'Not Found');
 		}
-		return next();
 	});
 
 

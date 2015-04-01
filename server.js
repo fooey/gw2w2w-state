@@ -10,15 +10,17 @@ if (isProd) {
 	require('newrelic');
 }
 
+// const restify = require('restify');
+
+// var server = restify.createServer({
+// 	name: 'state.gw2w2w.com',
+// });
+// require('./config/restify')(server, restify);
 
 
+var express = require('express');
+var app = require('./config/express')(express, nodeEnv);
 
-const restify = require('restify');
-
-var server = restify.createServer({
-	name: 'state.gw2w2w.com',
-});
-require('./config/restify')(server, restify);
 
 
 
@@ -26,10 +28,10 @@ var dataObj = require('./lib/data/update');
 
 dataObj.init(function() {
 
-	require('./routes')(server, restify, dataObj);
+	require('./routes')(app, express, dataObj);
 
 
-	server.listen(serverPort, function() {
+	app.listen(serverPort, function() {
 		console.log('');
 		console.log('**************************************************');
 		console.log('Express server started');
