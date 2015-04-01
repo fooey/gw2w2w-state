@@ -5,6 +5,8 @@ const isDev = (nodeEnv === 'development');
 const isProd = !isDev;
 const serverPort = process.env.PORT || 3000;
 
+require('babel/register');
+
 
 if (isProd) {
 	require('newrelic');

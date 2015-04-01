@@ -32,7 +32,6 @@ module.exports = function(express, nodeEnv) {
 	var morgan = require('morgan');
 	var compression = require('compression');
 	var errorhandler = require('errorhandler');
-	var cors = require('errorhandler');
 
 
 	if (isDev) {
@@ -45,7 +44,6 @@ module.exports = function(express, nodeEnv) {
 
 
 	app.use(compression());
-	app.use(cors());
 
 
 
