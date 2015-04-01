@@ -11,6 +11,7 @@ module.exports = function(server, restify, dataObj) {
 	*/
 
 	server.pre(restify.pre.sanitizePath());
+	restify.conditionalRequest();
 
 
 
@@ -68,7 +69,7 @@ module.exports = function(server, restify, dataObj) {
 		res.header('Last-Modified', match.lastmod * 1000);
 		res.json(match);
 		return next();
-	}, restify.conditionalRequest());
+	});
 
 
 
@@ -87,7 +88,7 @@ module.exports = function(server, restify, dataObj) {
 		}
 		res.json(data);
 		return next();
-	}, restify.conditionalRequest());
+	});
 
 	const detailsByWorldSlug = /^\/world\/([a-z-]+)$/;
 	server.get(detailsByWorldSlug, function(req, res, next) {
@@ -105,7 +106,7 @@ module.exports = function(server, restify, dataObj) {
 			res.send(404, 'Not Found');
 		}
 		return next();
-	}, restify.conditionalRequest());
+	});
 
 
 
