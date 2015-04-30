@@ -122,10 +122,9 @@ module.exports = function(app, express, dataObj) {
 
 	function returnMatchDetails(matchId, req, res) {
 		const matchDetails = getDetails(matchId);
-		const lastmod = ((matchDetails && matchDetails.details && matchDetails.details.initialized) ? matchDetails.details.lastmod * 1000 : Date.now()).toString();
-		const etag = `matchDetails::${matchId}::${lastmod}`;
 
-		conditionallyRespond(req, res, lastmod, etag, matchDetails);
+		res.send(matchDetails);
+		// conditionallyRespond(req, res, lastmod, etag, matchDetails);
 	}
 
 
