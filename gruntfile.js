@@ -30,7 +30,6 @@ module.exports = function(grunt) {
 			dev: {
 				script: './server.js',
 				options: {
-					"execMap": {"js": "iojs --harmony"},
 					ext: 'js,json,html',
 					ignore: ['./node_modules/**', 'gruntfile.js'],
 
