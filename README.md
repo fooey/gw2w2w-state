@@ -13,7 +13,9 @@
 	- by match_id
 		- [([12]\-[1-9])](/1-1)
 	- by [world_slug](https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js)
-		- [world/([a-z-]+)](/world/sea-of-sorrows)
+		- [world/([a-z-]+)](/world/fort-aspenwood)
+	- by [world_id](https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js)
+		- [world/([0-9]{4})](/world/1009)
 - debug
 	- all the things
 		- [dump](/dump)

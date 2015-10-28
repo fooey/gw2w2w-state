@@ -86,10 +86,29 @@ module.exports = function(app, express) {
         const world = getWorldBySlug(worldSlug);
 
         if (!world) {
-            return res.status(404).send(`Unknown WorldSlug: ${worldSlug}`);
+            return res.status(404).send(`Unknown WorldSlug: ${worldSlug}.\nSee https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js`);
         }
 
         const match = getMatchByWorldId(world.id);
+
+        if (!match) {
+            return res.status(404).send(`Match not found. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        }
+
+        const matchId = match.id;
+
+        return returnMatchDetails(matchId, req, res);
+    });
+
+    const detailsByWorldId = /^\/world\/([0-9-]{4})$/;
+    app.get(detailsByWorldId, function(req, res) {
+        const worldId = req.params[0];
+
+        if (!_.has(worlds, worldId)) {
+            return res.status(404).send(`Unknown worldId: ${worldId}.\nSee https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js`);
+        }
+
+        const match = getMatchByWorldId(worldId);
 
         if (!match) {
             return res.status(404).send(`Match not found. Possibly match reset time, or app is not ready, try again in a few seconds`);

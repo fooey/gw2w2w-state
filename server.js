@@ -5,6 +5,7 @@ GLOBAL.data = {matches: {}, details: {}};
 
 
 
+
 const nodeEnv = (process.env.NODE_ENV) ? process.env.NODE_ENV : 'production';
 const isDev = (nodeEnv === 'development');
 const isProd = !isDev;
@@ -13,6 +14,11 @@ const serverPort = process.env.PORT || 3000;
 
 if (isProd) {
 	require('newrelic');
+}
+else {
+	let memwatch = require('memwatch-next');
+	memwatch.on('leak', (info) => console.log('LEAK', info));
+	// memwatch.on('stats', (info) => console.log('stats', info));
 }
 
 var express = require('express');
