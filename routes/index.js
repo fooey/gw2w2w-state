@@ -46,6 +46,7 @@ module.exports = function(app, express) {
         return res.json(GLOBAL.data.matches);
     });
 
+
     const matchesByRegionId = /^\/matches\/([12])$/;
     app.get(matchesByRegionId, function(req, res) {
         const regionId = req.params[0];
@@ -60,11 +61,26 @@ module.exports = function(app, express) {
         return res.json(regionMatches);
     });
 
+
     const matchesByMatchId = /^\/matches\/([12]-[1-9])$/;
     app.get(matchesByMatchId, function(req, res) {
         const matchId = req.params[0];
 
         return res.json(_.get(GLOBAL.data.matches, [matchId], {}));
+    });
+
+
+    app.get('/matches/worlds$', function(req, res) {
+        let result = _.reduce(
+            GLOBAL.data.matches,
+            (acc, m) => {
+                ['red', 'blue', 'green'].forEach(c => acc[m.worlds[c]] = _.merge({color: c}, m));
+                return acc;
+            },
+            {}
+        );
+
+        return res.json(result);
     });
 
 

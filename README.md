@@ -9,6 +9,8 @@
 		- [/matches/([12])$](http://state.gw2w2w.com/matches/1)
 	- by match_id
 		- [/matches/([12]\-[1-9])](http://state.gw2w2w.com/matches/1-1)
+	- by worlds
+		- [/matches/worlds](http://state.gw2w2w.com/matches/worlds)
 - matchDetails
 	- by match_id
 		- [/([12]\-[1-9])](http://state.gw2w2w.com/1-1)
