@@ -18,6 +18,11 @@
 		- [/world/([a-z-]+)](http://state.gw2w2w.com/world/fort-aspenwood)
 	- by [world_id](https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js)
 		- [/world/([0-9]{4})](http://state.gw2w2w.com/world/1009)
+- worlds
+	- matchIds by worldId
+		- [/worlds](http://state.gw2w2w.com/worlds)
+	- world slugs
+		- [/worldslugs](http://state.gw2w2w.com/worldslugs)
 - debug
 	- all the things
 		- [/dump](http://state.gw2w2w.com/dump)

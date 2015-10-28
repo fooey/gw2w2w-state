@@ -1,7 +1,7 @@
 'use strict';
 
 require('babel/register');
-GLOBAL.data = {matches: {}, details: {}};
+GLOBAL.data = {matches: {}, details: {}, worlds: {}};
 
 
 
@@ -26,7 +26,7 @@ var app = require('./config/express')(express, nodeEnv);
 require('./routes')(app, express);
 
 
-require('./lib/data/update').init();
+require('./data/updater').init();
 
 
 

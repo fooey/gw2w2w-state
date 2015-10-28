@@ -1,9 +1,25 @@
 
 import _ from 'lodash';
-import {worlds} from 'gw2w2w-static';
+
+import {worlds as WORLDS} from 'gw2w2w-static';
+const WORLD_SLUGS = getWorldsBySlug(WORLDS);
 
 
 module.exports = function(app, express) {
+
+
+
+
+    /*
+     * CORS
+     */
+
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
 
 
 
@@ -17,12 +33,10 @@ module.exports = function(app, express) {
 
 
 
-
-    app.use(function(req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        next();
-    });
+    app.get(
+        '/favicon.ico',
+        (req, res) => res.redirect(301, '/gw2-dragon-32.png')
+    );
 
 
 
@@ -32,9 +46,31 @@ module.exports = function(app, express) {
      * debug
      */
 
-    app.get('/dump', function(req, res) {
-        return res.json(GLOBAL.data.details);
-    });
+    app.get(
+        '/dump',
+        (req, res) => res.json(GLOBAL.data)
+    );
+
+
+
+
+
+    /*
+     * worlds
+     */
+
+    app.get(
+        '/worlds',
+        (req, res) => res.json(GLOBAL.data.worlds)
+    );
+
+
+
+    app.get(
+        '/worldslugs',
+        (req, res) => res.json(WORLD_SLUGS)
+    );
+
 
 
 
@@ -42,15 +78,17 @@ module.exports = function(app, express) {
      * matches
      */
 
-    app.get('/matches$', function(req, res) {
-        return res.json(GLOBAL.data.matches);
-    });
+    app.get(
+        '/matches$',
+        (req, res) => res.json(GLOBAL.data.matches)
+    );
+
 
 
     const matchesByRegionId = /^\/matches\/([12])$/;
-    app.get(matchesByRegionId, function(req, res) {
+    app.get(matchesByRegionId, (req, res) => {
         const regionId = req.params[0];
-        console.log('matches by regionId', regionId);
+        // console.log('matches by regionId', regionId);
 
         const regionMatches = _
             .chain(GLOBAL.data.matches)
@@ -62,19 +100,28 @@ module.exports = function(app, express) {
     });
 
 
+
     const matchesByMatchId = /^\/matches\/([12]-[1-9])$/;
-    app.get(matchesByMatchId, function(req, res) {
+    app.get(matchesByMatchId, (req, res) => {
         const matchId = req.params[0];
 
-        return res.json(_.get(GLOBAL.data.matches, [matchId], {}));
+        if (_.has(GLOBAL.data.matches, [matchId])) {
+            return res.json(_.get(GLOBAL.data.matches, [matchId], {}));
+        }
+        else {
+            return res.status(404).send(`Match not found: ${matchId}. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        }
     });
 
 
-    app.get('/matches/worlds$', function(req, res) {
+
+    app.get('/matches/worlds$', (req, res) => {
         let result = _.reduce(
             GLOBAL.data.matches,
             (acc, m) => {
-                ['red', 'blue', 'green'].forEach(c => acc[m.worlds[c]] = _.merge({color: c}, m));
+                ['red', 'blue', 'green'].forEach(
+                    c => acc[m.worlds[c]] = _.merge({color: c}, m)
+                );
                 return acc;
             },
             {}
@@ -85,19 +132,28 @@ module.exports = function(app, express) {
 
 
 
+
+
     /*
      * matchDetails
      */
 
     const detailsByMatchId = /^\/([12]-[1-9])$/;
-    app.get(detailsByMatchId, function(req, res) {
+    app.get(detailsByMatchId, (req, res) => {
         const matchId = req.params[0];
 
-        returnMatchDetails(matchId, req, res);
+        if (_.has(GLOBAL.data.details, [matchId])) {
+            return res.json(_.get(GLOBAL.data.details, [matchId], {}));
+        }
+        else {
+            return res.status(404).send(`Match not found: ${matchId}. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        }
     });
 
+
+
     const detailsByWorldSlug = /^\/world\/([a-z-]+)$/;
-    app.get(detailsByWorldSlug, function(req, res) {
+    app.get(detailsByWorldSlug, (req, res) => {
         const worldSlug = req.params[0];
         const world = getWorldBySlug(worldSlug);
 
@@ -105,67 +161,84 @@ module.exports = function(app, express) {
             return res.status(404).send(`Unknown WorldSlug: ${worldSlug}.\nSee https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js`);
         }
 
-        const match = getMatchByWorldId(world.id);
+        const matchDetails = getDetailsByWorldId(world.id);
 
-        if (!match) {
-            return res.status(404).send(`Match not found. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        if (matchDetails) {
+            return res.json(matchDetails);
         }
-
-        const matchId = match.id;
-
-        return returnMatchDetails(matchId, req, res);
+        else {
+            return res.status(404).send(`Match not found: ${matchId}. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        }
     });
 
+
+
     const detailsByWorldId = /^\/world\/([0-9-]{4})$/;
-    app.get(detailsByWorldId, function(req, res) {
+    app.get(detailsByWorldId, (req, res) => {
         const worldId = req.params[0];
 
-        if (!_.has(worlds, worldId)) {
+        if (!_.has(WORLDS, worldId)) {
             return res.status(404).send(`Unknown worldId: ${worldId}.\nSee https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js`);
         }
 
-        const match = getMatchByWorldId(worldId);
+        const matchDetails = getDetailsByWorldId(worldId);
 
-        if (!match) {
-            return res.status(404).send(`Match not found. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        if (matchDetails) {
+            return res.json(matchDetails);
         }
-
-        const matchId = match.id;
-
-        return returnMatchDetails(matchId, req, res);
+        else {
+            return res.status(404).send(`Match not found: ${matchId}. Possibly match reset time, or app is not ready, try again in a few seconds`);
+        }
     });
 
-
-
-
-
-    function returnMatchDetails(matchId, req, res) {
-        return res.json(_.get(GLOBAL.data.details, [matchId], {}));
-    }
-
-
-
-    function getWorldBySlug(worldSlug) {
-        return _.find(worlds, function(world) {
-            return (
-                world.en.slug === worldSlug
-                || world.es.slug === worldSlug
-                || world.de.slug === worldSlug
-                || world.fr.slug === worldSlug
-            );
-        });
-    }
-
-
-
-    function getMatchByWorldId(worldId) {
-        return _.find(GLOBAL.data.matches, function(match) {
-            return (
-                worldId == match.worlds.red
-                || worldId == match.worlds.blue
-                || worldId == match.worlds.green
-            );
-        });
-    }
-
 };
+
+
+
+
+
+
+/*
+ * helpers
+ */
+
+
+function getWorldBySlug(worldSlug) {
+    const worldId = _.get(WORLD_SLUGS, worldSlug);
+
+    return _.get(WORLDS, worldId);
+}
+
+
+
+function getMatchByWorldId(worldId) {
+    const matchId = _.get(GLOBAL.data.worlds, worldId);
+    const match = _.get(GLOBAL.data.matches, matchId);
+
+    return match;
+}
+
+
+
+function getDetailsByWorldId(worldId) {
+    const matchId = _.get(GLOBAL.data.worlds, worldId);
+    const details = _.get(GLOBAL.data.details, matchId);
+
+    return details;
+}
+
+
+
+function getWorldsBySlug(worlds) {
+    return _.reduce(
+        worlds,
+        (acc, world) => {
+            acc[world.en.slug] = world.id;
+            acc[world.es.slug] = world.id;
+            acc[world.de.slug] = world.id;
+            acc[world.fr.slug] = world.id;
+            return acc;
+        },
+        {}
+    )
+}
