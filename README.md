@@ -4,18 +4,18 @@
 
 - matches
 	- all
-		- [matches$](/matches)
+		- [http://state.gw2w2w.com/matches$](/matches)
 	- by region (1=NA, 2=EU)
-		- [matches/([12])$](/matches/1)
+		- [http://state.gw2w2w.com/matches/([12])$](/matches/1)
 	- by match_id
-		- [matches/([12]\-[1-9])](/matches/1-1)
+		- [http://state.gw2w2w.com/matches/([12]\-[1-9])](/matches/1-1)
 - matchDetails
 	- by match_id
-		- [([12]\-[1-9])](/1-1)
+		- [http://state.gw2w2w.com/([12]\-[1-9])](/1-1)
 	- by [world_slug](https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js)
-		- [world/([a-z-]+)](/world/fort-aspenwood)
+		- [http://state.gw2w2w.com/world/([a-z-]+)](/world/fort-aspenwood)
 	- by [world_id](https://github.com/fooey/gw2w2w-static/blob/master/data/world_names.js)
-		- [world/([0-9]{4})](/world/1009)
+		- [http://state.gw2w2w.com/world/([0-9]{4})](/world/1009)
 - debug
 	- all the things
-		- [dump](/dump)
+		- [http://state.gw2w2w.com/dump](/dump)
