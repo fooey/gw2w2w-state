@@ -187,7 +187,7 @@ module.exports = function(app, express) {
             return res.json(matchDetails);
         }
         else {
-            return res.status(404).send(`Match not found: ${matchId}. Possibly match reset time, or app is not ready, try again in a few seconds`);
+            return res.status(404).send(`Not found. Possibly match reset time, or app is not ready, try again in a few seconds`);
         }
     });
 

@@ -114,6 +114,7 @@ function reformatMatchData(match) {
     match.region = match.id[0];
 
     match.maps = match.maps.map(m => reformatMapData(m));
+    // match.logs = getLogs(match.logs, match.maps);
 
     match.lastmod = 0;
     match.holdings = _.cloneDeep(DEFAULT_HOLDINGS);
@@ -193,3 +194,18 @@ function getWorldsFromMatches(matches) {
         {}
     );
 }
+
+
+// function getLogs(logs = [], maps) {
+//     const logsLastmod = _.max(logs, 'lastmod').lastmod || 0;
+
+//     const newObjectives = _
+//         .chain(maps)
+//         .pluck('objectives')
+//         .flatten()
+//         .filter(o => o.lastmod > logsLastmod)
+//         .sortBy('lastmod')
+//         .value();
+
+//     return logs.concat(newObjectives);
+// };
