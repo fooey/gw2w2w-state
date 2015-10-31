@@ -123,9 +123,13 @@ function reformatMatchData(match) {
     _.forEach(match.maps, (map, key) => {
         match.lastmod = Math.max(match.lastmod, map.lastmod);
         _.forEach(map.holdings, (holding, color) => {
-            _.forEach(holding, (val, type) => {
-                match.holdings[color][type] += val;
-                match.ticks[color] += (OBJECTIVE_VALUES[type] * val);
+            _.forEach(holding, (num, type) => {
+                let holding = _.get(match, ['holdings', color, type], 0);
+                let tick = _.get(match, ['ticks', color], 0);
+                let objectiveVal = _.get(OBJECTIVE_VALUES, [type], 0);
+
+                _.set(match, ['holdings', color, type], holding + num)
+                _.set(match, ['ticks', color], tick + (objectiveVal * num));
             });
         });
     });
@@ -146,9 +150,13 @@ function reformatMapData(map) {
     map.ticks = _.cloneDeep(DEFAULT_TICKS);
 
     _.forEach(map.objectives, o => {
+        let holding = _.get(map, ['holdings', o.owner, o.type], 0);
+        let tick = _.get(map, ['ticks', o.owner], 0);
+        let objectiveVal = _.get(OBJECTIVE_VALUES, [o.type], 0);
+
         map.lastmod = Math.max(map.lastmod, o.lastmod);
-        map.holdings[o.owner][o.type] += 1;
-        map.ticks[o.owner] += OBJECTIVE_VALUES[o.type];
+        _.set(map, ['holdings', o.owner, o.type], holding + 1);
+        _.set(map, ['ticks', o.owner], tick + objectiveVal);
     });
 
     delete map.bonuses;
