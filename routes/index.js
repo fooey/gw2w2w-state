@@ -14,9 +14,9 @@ module.exports = function(app, express) {
      * CORS
      */
 
-    app.use(function(req, res, next) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    app.use((req, res, next) => {
+        res.header(`Access-Control-Allow-Origin`, `*`);
+        res.header(`Access-Control-Allow-Headers`, `Origin, X-Requested-With, Content-Type, Accept`);
         next();
     });
 
@@ -28,7 +28,7 @@ module.exports = function(app, express) {
      */
 
     app.use(express.static('public', {
-        index: 'index.html'
+        index: 'index.html',
     }));
 
 
@@ -116,11 +116,12 @@ module.exports = function(app, express) {
 
 
     app.get('/matches/worlds$', (req, res) => {
-        let result = _.reduce(
+        const result = _.reduce(
             GLOBAL.data.matches,
             (acc, m) => {
                 ['red', 'blue', 'green'].forEach(
-                    c => acc[m.worlds[c]] = _.merge({color: c}, m)
+                    (c) =>
+                    acc[m.worlds[c]] = _.merge({color: c}, m)
                 );
                 return acc;
             },
@@ -240,5 +241,5 @@ function getWorldsBySlug(worlds) {
             return acc;
         },
         {}
-    )
+    );
 }

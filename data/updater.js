@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import request from 'superagent';
+import request from 'request';
 
 
 
@@ -60,26 +60,39 @@ export function init() {
 */
 
 function getRemote() {
-    request
-        .get('https://api.guildwars2.com/v2/wvw/matches?ids=all')
-        .set('User-Agent', 'state.gw2w2w.com')
-        .end((err, res) => {
-            // console.log('state::update::status', res.status);
+    request({
+        url: `https://api.guildwars2.com/v2/wvw/matches?ids=all`,
+        gzip: true,
+        'User-Agent': `state.gw2w2w.com`,
+    },
+    (err, res, body) => {
+        const data = parseJSON(body, {});
+        console.log('state::update::status', res.statusCode, body.length);
 
-            if(res.status === 200) {
-                GLOBAL.data = reformatData(res.body);
-            }
-            setTimeout(getRemote, getInterval());
-        });
+        if (res.statusCode === 200 && !_.isEmpty(data)) {
+            GLOBAL.data = reformatData(data);
+        }
+        setTimeout(getRemote, getInterval());
+    });
+}
+
+
+function parseJSON(jsonString, defaultResult = {}) {
+    try {
+        return JSON.parse(jsonString);
+    }
+    catch (ex) {
+        return defaultResult;
+    }
 }
 
 
 
 function getInterval() {
-    const minTime = 2;
-    const maxTime = 4;
+    const minTime = 4;
+    const maxTime = 8;
 
-    return _.random(minTime * 200, maxTime * 1000);
+    return _.random(minTime * 1000, maxTime * 1000);
 }
 
 
@@ -87,18 +100,20 @@ function getInterval() {
 function reformatData(data) {
     const details = _
         .chain(data)
-        .map(match => reformatMatchData(match))
         .indexBy('id')
+        .mapValues(
+            (match) =>
+            reformatMatchData(match)
+        )
         .value();
 
     const matches = _
         .chain(details)
         .cloneDeep()
-        .map(m => {
+        .mapValues((m) => {
             delete m.maps;
             return m;
         })
-        .indexBy('id')
         .value();
 
     const worlds = getWorldsFromMatches(matches);
@@ -113,22 +128,22 @@ function reformatMatchData(match) {
     match.endTime = moment(match.end_time).unix();
     match.region = match.id[0];
 
-    match.maps = match.maps.map(m => reformatMapData(m));
+    match.maps = match.maps.map((m) => reformatMapData(m));
     // match.logs = getLogs(match.logs, match.maps);
 
     match.lastmod = 0;
     match.holdings = _.cloneDeep(DEFAULT_HOLDINGS);
     match.ticks = _.cloneDeep(DEFAULT_TICKS);
 
-    _.forEach(match.maps, (map, key) => {
+    _.forEach(match.maps, (map) => {
         match.lastmod = Math.max(match.lastmod, map.lastmod);
         _.forEach(map.holdings, (holding, color) => {
             _.forEach(holding, (num, type) => {
-                let holding = _.get(match, ['holdings', color, type], 0);
-                let tick = _.get(match, ['ticks', color], 0);
-                let objectiveVal = _.get(OBJECTIVE_VALUES, [type], 0);
+                const holdingVal = _.get(match, ['holdings', color, type], 0);
+                const tick = _.get(match, ['ticks', color], 0);
+                const objectiveVal = _.get(OBJECTIVE_VALUES, [type], 0);
 
-                _.set(match, ['holdings', color, type], holding + num)
+                _.set(match, ['holdings', color, type], holdingVal + num);
                 _.set(match, ['ticks', color], tick + (objectiveVal * num));
             });
         });
@@ -143,16 +158,16 @@ function reformatMatchData(match) {
 
 
 function reformatMapData(map) {
-    map.objectives = map.objectives.map(o => reformatObjectiveData(o));
+    map.objectives = map.objectives.map((o) => reformatObjectiveData(o));
 
     map.lastmod = 0;
     map.holdings = _.cloneDeep(DEFAULT_HOLDINGS);
     map.ticks = _.cloneDeep(DEFAULT_TICKS);
 
-    _.forEach(map.objectives, o => {
-        let holding = _.get(map, ['holdings', o.owner, o.type], 0);
-        let tick = _.get(map, ['ticks', o.owner], 0);
-        let objectiveVal = _.get(OBJECTIVE_VALUES, [o.type], 0);
+    _.forEach(map.objectives, (o) => {
+        const holding = _.get(map, ['holdings', o.owner, o.type], 0);
+        const tick = _.get(map, ['ticks', o.owner], 0);
+        const objectiveVal = _.get(OBJECTIVE_VALUES, [o.type], 0);
 
         map.lastmod = Math.max(map.lastmod, o.lastmod);
         _.set(map, ['holdings', o.owner, o.type], holding + 1);
@@ -195,7 +210,7 @@ function getWorldsFromMatches(matches) {
         matches,
         (acc, m) => {
             ['red', 'blue', 'green'].forEach(
-                c => acc[m.worlds[c]] = m.id
+                (c) => acc[m.worlds[c]] = m.id
             );
             return acc;
         },
