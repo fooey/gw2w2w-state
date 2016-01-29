@@ -66,12 +66,14 @@ function getRemote() {
         'User-Agent': `state.gw2w2w.com`,
     },
     (err, res, body) => {
-        const data = parseJSON(body, {});
-        console.log('state::update::status', res.statusCode, body.length);
+        // console.log('state::update::status', res.statusCode, body.length);
 
-        if (res.statusCode === 200 && !_.isEmpty(data)) {
+        if (res && res.statusCode && res.statusCode === 200 && body.length) {
+            const data = parseJSON(body, {});
+
             GLOBAL.data = reformatData(data);
         }
+
         setTimeout(getRemote, getInterval());
     });
 }
@@ -101,16 +103,13 @@ function reformatData(data) {
     const details = _
         .chain(data)
         .indexBy('id')
-        .mapValues(
-            (match) =>
-            reformatMatchData(match)
-        )
+        .mapValues(match => reformatMatchData(match))
         .value();
 
     const matches = _
         .chain(details)
         .cloneDeep()
-        .mapValues((m) => {
+        .mapValues(m => {
             delete m.maps;
             return m;
         })
@@ -128,14 +127,14 @@ function reformatMatchData(match) {
     match.endTime = moment(match.end_time).unix();
     match.region = match.id[0];
 
-    match.maps = match.maps.map((m) => reformatMapData(m));
+    match.maps = match.maps.map(m => reformatMapData(m));
     // match.logs = getLogs(match.logs, match.maps);
 
     match.lastmod = 0;
     match.holdings = _.cloneDeep(DEFAULT_HOLDINGS);
     match.ticks = _.cloneDeep(DEFAULT_TICKS);
 
-    _.forEach(match.maps, (map) => {
+    _.forEach(match.maps, map => {
         match.lastmod = Math.max(match.lastmod, map.lastmod);
         _.forEach(map.holdings, (holding, color) => {
             _.forEach(holding, (num, type) => {
@@ -158,13 +157,13 @@ function reformatMatchData(match) {
 
 
 function reformatMapData(map) {
-    map.objectives = map.objectives.map((o) => reformatObjectiveData(o));
+    map.objectives = map.objectives.map(o => reformatObjectiveData(o));
 
     map.lastmod = 0;
     map.holdings = _.cloneDeep(DEFAULT_HOLDINGS);
     map.ticks = _.cloneDeep(DEFAULT_TICKS);
 
-    _.forEach(map.objectives, (o) => {
+    _.forEach(map.objectives, o => {
         const holding = _.get(map, ['holdings', o.owner, o.type], 0);
         const tick = _.get(map, ['ticks', o.owner], 0);
         const objectiveVal = _.get(OBJECTIVE_VALUES, [o.type], 0);
@@ -210,8 +209,9 @@ function getWorldsFromMatches(matches) {
         matches,
         (acc, m) => {
             ['red', 'blue', 'green'].forEach(
-                (c) => acc[m.worlds[c]] = m.id
+                c => acc[m.worlds[c]] = m.id
             );
+
             return acc;
         },
         {}
