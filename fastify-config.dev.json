@@ -1,0 +1,7 @@
+{
+  "port": 3001,
+  "logLevel": "info",
+  "prettyLogs": true,
+  "watch": true,
+  "ignoreWatch": "./node_modules ./src ./.git"
+}
