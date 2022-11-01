@@ -1,7 +1,7 @@
 {
   "name": "gw2w2w-state",
   "version": "1.0.0",
-  "description": "This project was bootstrapped with Fastify-CLI.",
+  "description": "gw2w2w-state",
   "main": "app.js",
   "directories": {
     "test": "test"
@@ -9,9 +9,7 @@
   "scripts": {
     "build": "tsc -w",
     "dev": "concurrently npm:build npm:start:dev",
-    "start": "fastify start -l info app.js",
-    "start:dev": "fastify start --config fastify-config.dev.json ./build/app.js",
-    "test": "tap \"test/**/*.test.js\""
+    "start": "fastify start -l info app.js"
   },
   "repository": {
     "type": "git",
@@ -34,9 +32,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.8",
-    "concurrently": "^7.5.0",
     "prettier": "^2.7.1",
-    "tap": "^16.1.0",
     "typescript": "^4.8.4"
   }
 }
